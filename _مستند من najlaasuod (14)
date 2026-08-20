@@ -1,0 +1,5 @@
+<?php require_once '../config/database.php'; require_once '../includes/functions.php'; require_admin(); include '../includes/header.php';
+$users=$pdo->query('SELECT COUNT(*) c FROM users')->fetch()['c']; $products=$pdo->query('SELECT COUNT(*) c FROM products')->fetch()['c']; $orders=$pdo->query('SELECT COUNT(*) c FROM orders')->fetch()['c']; $sales=$pdo->query('SELECT IFNULL(SUM(total),0) c FROM orders')->fetch()['c']; ?>
+<h2>لوحة تحكم المدير</h2><div class="row g-3 mb-4"><div class="col-md-3"><div class="small-box">المستخدمين<h3><?= $users ?></h3></div></div><div class="col-md-3"><div class="small-box">المنتجات<h3><?= $products ?></h3></div></div><div class="col-md-3"><div class="small-box">الطلبات<h3><?= $orders ?></h3></div></div><div class="col-md-3"><div class="small-box">المبيعات<h3>$<?= $sales ?></h3></div></div></div>
+<a class="btn btn-glow" href="products.php">إدارة المنتجات</a> <a class="btn btn-outline-info" href="orders.php">إدارة الطلبات</a>
+<?php include '../includes/footer.php'; ?>

@@ -1,0 +1,9 @@
+<?php require_once '../config/database.php'; require_once '../includes/functions.php';
+if($_SERVER['REQUEST_METHOD']==='POST'){
+ $name=trim($_POST['name']); $email=filter_var($_POST['email'],FILTER_VALIDATE_EMAIL); $pass=$_POST['password']??'';
+ if(strlen($name)<3 || !$email || strlen($pass)<6) flash('error','الاسم 3 أحرف على الأقل، وكلمة المرور 6 أحرف على الأقل');
+ else { try{ $st=$pdo->prepare('INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)'); $st->execute([$name,$email,password_hash($pass,PASSWORD_DEFAULT),'user']); flash('success','تم إنشاء الحساب، سجل دخولك الآن'); redirect('login.php'); } catch(Exception $e){ flash('error','البريد مستخدم سابقاً'); } }
+}
+include '../includes/header.php'; ?>
+<h2>إنشاء حساب</h2><form method="post" class="small-box col-md-6"><input name="name" class="form-control mb-3" placeholder="الاسم" required><input name="email" type="email" class="form-control mb-3" placeholder="البريد الإلكتروني" required><input name="password" type="password" class="form-control mb-3" placeholder="كلمة المرور" required><button class="btn btn-glow">تسجيل</button></form>
+<?php include '../includes/footer.php'; ?>

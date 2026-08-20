@@ -1,0 +1,43 @@
+<?php require_once __DIR__ . '/functions.php';
+$base = (str_contains($_SERVER['SCRIPT_NAME'], '/admin/') || str_contains($_SERVER['SCRIPT_NAME'], '/auth/')) ? '../' : '';
+$current = basename($_SERVER['SCRIPT_NAME']);
+?>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Tech</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="<?= $base ?>assets/css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg smart-nav sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="<?= $base ?>index.php">
+      <img src="<?= $base ?>assets/images/logo.png" class="brand-logo" alt="Smart Tech Logo">
+      <span>Smart Tech</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 nav-links">
+        <li class="nav-item"><a class="nav-link <?= $current=='index.php'?'active':'' ?>" href="<?= $base ?>index.php">الرئيسية</a></li>
+        <li class="nav-item"><a class="nav-link <?= $current=='products.php'?'active':'' ?>" href="<?= $base ?>products.php">المنتجات</a></li>
+        <li class="nav-item"><a class="nav-link <?= $current=='cart.php'?'active':'' ?>" href="<?= $base ?>cart.php">السلة</a></li>
+        <?php if(is_admin()): ?><li class="nav-item"><a class="nav-link" href="<?= $base ?>admin/dashboard.php">لوحة التحكم</a></li><?php endif; ?>
+      </ul>
+      <div class="d-flex gap-2 auth-buttons">
+        <?php if(is_logged_in()): ?>
+          <span class="text-info pt-2">أهلاً، <?= e($_SESSION['name']) ?></span>
+          <a class="btn btn-outline-tech btn-sm" href="<?= $base ?>auth/logout.php">خروج</a>
+        <?php else: ?>
+          <a class="btn btn-tech btn-sm" href="<?= $base ?>auth/login.php">تسجيل دخول</a>
+          <a class="btn btn-cyan btn-sm" href="<?= $base ?>auth/register.php">حساب جديد</a>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+</nav>
+<main class="container py-4">
+<?php if($m=flash('success')): ?><div class="alert alert-success"><?= e($m) ?></div><?php endif; ?>
+<?php if($m=flash('error')): ?><div class="alert alert-danger"><?= e($m) ?></div><?php endif; ?>

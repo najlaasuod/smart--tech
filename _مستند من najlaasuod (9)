@@ -1,0 +1,79 @@
+<?php
+require_once 'config/database.php';
+include 'includes/header.php';
+
+$id = (int)($_GET['id'] ?? 0);
+
+$st = $pdo->prepare("
+    SELECT p.*, c.name AS category
+    FROM products p
+    LEFT JOIN categories c ON c.id = p.category_id
+    WHERE p.id = ?
+");
+$st->execute([$id]);
+$p = $st->fetch();
+
+if (!$p) {
+    flash('error', 'المنتج غير موجود');
+    redirect('products.php');
+}
+
+function detail_product_image_path($img) {
+    if (!$img) return 'assets/images/products/phone.png';
+    if (str_starts_with($img, 'uploads/') || str_starts_with($img, 'assets/')) return $img;
+    return 'assets/images/products/' . $img;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $qty = max(1, (int)($_POST['qty'] ?? 1));
+
+    if ($qty > (int)$p['stock']) {
+        flash('error', 'الكمية المطلوبة أكبر من المخزون المتوفر');
+    } else {
+        $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + $qty;
+        flash('success', 'تمت إضافة المنتج إلى السلة بنجاح');
+        redirect('cart.php');
+    }
+}
+?>
+
+<section class="product-details-box">
+    <div class="row g-4 align-items-center">
+        <div class="col-lg-6">
+            <div class="product-details-image-wrap">
+                <img src="<?= e(detail_product_image_path($p['image'])) ?>" alt="<?= e($p['name']) ?>" class="product-details-img">
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <a href="products.php" class="back-link">العودة إلى المنتجات</a>
+
+            <div class="category-pill"><?= e($p['category'] ?? 'منتج') ?></div>
+            <h1 class="product-details-title"><?= e($p['name']) ?></h1>
+            <p class="product-details-desc"><?= e($p['description']) ?></p>
+
+            <div class="details-stats">
+                <div>
+                    <span>السعر</span>
+                    <strong>$<?= number_format((float)$p['price'], 2) ?></strong>
+                </div>
+                <div>
+                    <span>المخزون</span>
+                    <strong><?= e($p['stock']) ?> قطعة</strong>
+                </div>
+            </div>
+
+            <form method="post" class="add-cart-form">
+                <label for="qty" class="form-label">الكمية</label>
+                <div class="cart-action-row">
+                    <input id="qty" type="number" name="qty" value="1" min="1" max="<?= e($p['stock']) ?>" class="form-control" <?= (int)$p['stock'] <= 0 ? 'disabled' : '' ?>>
+                    <button class="btn btn-tech" <?= (int)$p['stock'] <= 0 ? 'disabled' : '' ?>>
+                        أضف إلى السلة
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<?php include 'includes/footer.php'; ?>

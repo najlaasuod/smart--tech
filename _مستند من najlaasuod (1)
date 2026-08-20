@@ -1,0 +1,22 @@
+</main>
+<footer class="smart-footer py-4">
+  <div class="container">
+    <div class="row align-items-center g-3">
+      <div class="col-md-6 d-flex align-items-center gap-3">
+        <img src="<?= $base ?>assets/images/logo.png" class="footer-logo" alt="Smart Tech Logo">
+        <div>
+          <div class="footer-title">مشروع Smart Tech</div>
+          <div class="footer-small">متجر إلكتروني للأجهزة التقنية</div>
+        </div>
+      </div>
+      <div class="col-md-6 text-md-end text-center">
+        <div class="footer-small">إعداد الطلاب</div>
+        <div class="footer-names fw-bold">إسلام فارس درويش و نجلاء سعود مخيمر</div>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="<?= $base ?>assets/js/main.js"></script>
+</body>
+</html>

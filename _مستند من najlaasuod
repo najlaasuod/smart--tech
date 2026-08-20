@@ -1,0 +1,13 @@
+<?php require_once 'config/database.php'; include 'includes/header.php';
+$cart=$_SESSION['cart']??[]; $items=[]; $total=0;
+if(isset($_GET['remove'])){ unset($_SESSION['cart'][(int)$_GET['remove']]); redirect('cart.php'); }
+foreach($cart as $id=>$qty){ $st=$pdo->prepare('SELECT * FROM products WHERE id=?'); $st->execute([$id]); if($p=$st->fetch()){ $p['qty']=$qty; $p['sub']=$qty*$p['price']; $total+=$p['sub']; $items[]=$p; } }
+if($_SERVER['REQUEST_METHOD']==='POST'){
+ require_login(); if(!$items){ flash('error','السلة فارغة'); redirect('cart.php'); }
+ $pdo->beginTransaction(); $st=$pdo->prepare('INSERT INTO orders(user_id,total) VALUES(?,?)'); $st->execute([$_SESSION['user_id'],$total]); $oid=$pdo->lastInsertId();
+ foreach($items as $it){ $pdo->prepare('INSERT INTO order_details(order_id,product_id,quantity,price) VALUES(?,?,?,?)')->execute([$oid,$it['id'],$it['qty'],$it['price']]); $pdo->prepare('UPDATE products SET stock=stock-? WHERE id=?')->execute([$it['qty'],$it['id']]); }
+ $pdo->commit(); unset($_SESSION['cart']); flash('success','تم إرسال الطلب بنجاح'); redirect('products.php');
+}
+?>
+<h2>سلة التسوق</h2><table class="table"><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>حذف</th></tr><?php foreach($items as $it): ?><tr><td><?= e($it['name']) ?></td><td><?= e($it['qty']) ?></td><td>$<?= e($it['sub']) ?></td><td><a class="btn btn-sm btn-danger" href="?remove=<?= $it['id'] ?>">حذف</a></td></tr><?php endforeach; ?></table><h4>الإجمالي: $<?= $total ?></h4><form method="post"><button class="btn btn-glow">إتمام الطلب</button></form>
+<?php include 'includes/footer.php'; ?>

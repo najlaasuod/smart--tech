@@ -1,0 +1,146 @@
+<?php
+require_once 'config/database.php';
+require_once 'includes/functions.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+$stmt = $pdo->prepare("
+    SELECT 
+        p.*,
+        c.name AS category
+    FROM products p
+    LEFT JOIN categories c ON c.id = p.category_id
+    WHERE p.id = ?
+    LIMIT 1
+");
+
+$stmt->execute([$id]);
+$product = $stmt->fetch();
+
+if (!$product) {
+    flash('error', 'المنتج غير موجود');
+    redirect('products.php');
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+
+    $qty = isset($_POST['qty']) ? (int)$_POST['qty'] : 1;
+
+    if ($qty < 1) {
+        $qty = 1;
+    }
+
+    if ($qty > (int)$product['stock']) {
+        $qty = (int)$product['stock'];
+    }
+
+    if (!isset($_SESSION['cart'])) {
+        $_SESSION['cart'] = [];
+    }
+
+    if (isset($_SESSION['cart'][$id])) {
+        $_SESSION['cart'][$id] += $qty;
+    } else {
+        $_SESSION['cart'][$id] = $qty;
+    }
+
+    flash('success', 'تمت إضافة المنتج إلى السلة');
+    redirect('cart.php');
+}
+
+$image = !empty($product['image']) ? $product['image'] : 'assets/images/products/phone.svg';
+
+include 'includes/header.php';
+?>
+
+<div class="container my-5">
+
+    <div class="section-card">
+
+        <div class="row g-5 align-items-center">
+
+            <div class="col-lg-6">
+                <img 
+                    src="<?= e($image) ?>" 
+                    alt="<?= e($product['name']) ?>" 
+                    class="product-details-img"
+                >
+            </div>
+
+            <div class="col-lg-6">
+
+                <h1 class="product-details-title mb-3">
+                    <?= e($product['name']) ?>
+                </h1>
+
+                <p class="product-details-desc mb-3">
+                    <?= e($product['description']) ?>
+                </p>
+
+                <div class="mb-3">
+                    <strong>التصنيف:</strong>
+                    <span class="category-text">
+                        <?= e($product['category'] ?? 'بدون تصنيف') ?>
+                    </span>
+                </div>
+
+                <div class="price mb-3">
+                    $<?= number_format((float)$product['price'], 2) ?>
+                </div>
+
+                <div class="mb-4">
+                    <strong>المتوفر:</strong>
+                    <?= (int)$product['stock'] ?> قطعة
+                </div>
+
+                <?php if ((int)$product['stock'] > 0): ?>
+
+                    <form method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label">الكمية</label>
+                            <input 
+                                type="number" 
+                                name="qty" 
+                                class="form-control" 
+                                value="1" 
+                                min="1" 
+                                max="<?= (int)$product['stock'] ?>"
+                            >
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            name="add_to_cart" 
+                            class="btn btn-cyan w-100"
+                        >
+                            أضف إلى السلة
+                        </button>
+
+                    </form>
+
+                <?php else: ?>
+
+                    <div class="alert alert-warning">
+                        هذا المنتج غير متوفر حالياً.
+                    </div>
+
+                <?php endif; ?>
+
+                <a href="products.php" class="btn btn-outline-tech mt-3">
+                    رجوع إلى المنتجات
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<?php include 'includes/footer.php'; ?>

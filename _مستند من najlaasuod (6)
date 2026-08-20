@@ -1,0 +1,136 @@
+<?php
+require_once 'config/database.php'; 
+
+$cat_id = isset($_GET['cat']) ? (int)$_GET['cat'] : 0;
+
+// جلب الفئات
+$cats = $pdo->query("SELECT * FROM categories ORDER BY id ASC")->fetchAll();
+
+// جلب المنتجات
+if($cat_id > 0){
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE category_id = ? ORDER BY id DESC");
+    $stmt->execute([$cat_id]);
+} else {
+    $stmt = $pdo->query("SELECT * FROM products ORDER BY id DESC");
+}
+$products = $stmt->fetchAll();
+?>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>المنتجات - Smart Tech</title>
+    <style>
+        *{margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma;}
+        body{background:#f8f9fa; color:#333;}
+        
+        /* الهيدر زي الصورة */
+        .navbar{
+            background:#fff; padding:15px 50px; display:flex; 
+            justify-content:space-between; align-items:center;
+            box-shadow:0 2px 5px rgba(0,0,0,0.05);
+        }
+        .navbar .logo{display:flex; align-items:center; gap:10px; font-size:20px; font-weight:bold; color:#1a2b4c;}
+        .navbar .logo img{width:45px;}
+        .navbar .links a{margin:0 15px; text-decoration:none; color:#333; font-weight:500;}
+        .navbar .links a.active{background:#1a2b4c; color:#fff; padding:8px 18px; border-radius:20px;}
+        .navbar .btns a{padding:8px 18px; border-radius:20px; text-decoration:none; font-weight:500; margin-right:8px;}
+        .btn-login{background:#1a2b4c; color:#fff;}
+        .btn-register{background:#00c8ff; color:#fff;}
+
+        .container{max-width:1200px; margin:30px auto; padding:0 20px;}
+        h1{text-align:right; margin-bottom:20px; color:#1a2b4c;}
+
+        /* الفلتر */
+        .filter-box{background:#fff; padding:15px; border-radius:10px; margin-bottom:30px; box-shadow:0 2px 5px rgba(0,0,0,0.05);}
+        .filter-box select{width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:15px;}
+
+        /* المنتجات */
+        .products{display:grid; grid-template-columns: repeat(3, 1fr); gap:25px;}
+        .card{
+            background:#fff; padding:20px; border-radius:12px; 
+            box-shadow:0 2px 8px rgba(0,0,0,0.06); text-align:center;
+        }
+        .card img{
+            width:120px; height:120px; object-fit:contain;
+            background:#eaf6ff; padding:12px; border-radius:8px; margin-bottom:12px;
+        }
+        .card h3{font-size:17px; margin:8px 0; color:#222;}
+        .card p{font-size:13px; color:#777; margin:8px 0; min-height:35px;}
+        .card .price{color:#27ae60; font-size:18px; font-weight:bold;}
+
+        /* الفوتر */
+        .footer{
+            background:#1a2b4c; color:#fff; padding:30px 50px; 
+            margin-top:50px; display:flex; justify-content:space-between;
+            border-top:3px solid #00c8ff;
+        }
+        .footer .right{text-align:right;}
+        .footer .left{text-align:left;}
+    </style>
+</head>
+<body>
+
+<!-- الهيدر -->
+<div class="navbar">
+    <div style="display:flex; align-items:center; gap:15px;">
+        <div class="logo">
+            <img src="assets/images/logo.png" alt="">
+            Smart Tech
+        </div>
+        <div class="links">
+            <a href="index.php">الرئيسية</a>
+            <a href="products.php" class="active">المنتجات</a>
+            <a href="cart.php">السلة</a>
+        </div>
+    </div>
+    <div class="btns">
+        <a href="login.php" class="btn-login">تسجيل دخول</a>
+        <a href="register.php" class="btn-register">حساب جديد</a>
+    </div>
+</div>
+
+<div class="container">
+    <h1>المنتجات</h1>
+
+    <!-- الفلتر -->
+    <div class="filter-box">
+        <form method="GET">
+            <select name="cat" onchange="this.form.submit()">
+                <option value="0">كل التصنيفات</option>
+                <?php foreach($cats as $cat): ?>
+                    <option value="<?php echo $cat['id']; ?>" <?php echo $cat_id==$cat['id']?'selected':''; ?>>
+                        <?php echo $cat['name']; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+    </div>
+
+    <!-- المنتجات -->
+    <div class="products">
+        <?php foreach($products as $p): ?>
+            <div class="card">
+                <img src="assets/images/products/<?php echo $p['image']; ?>" alt="">
+                <h3><?php echo $p['name']; ?></h3>
+                <p><?php echo $p['description']; ?></p>
+                <div class="price"><?php echo number_format($p['price'], 2); ?> $</div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<!-- الفوتر -->
+<div class="footer">
+    <div class="right">
+        <b>مشروع Smart Tech</b><br>
+        متجر إلكتروني للأجهزة التقنية
+    </div>
+    <div class="left">
+        إعداد الطلاب<br>
+        <b>إسلام فارس درويش و نجلاء سعود مخيمر</b>
+    </div>
+</div>
+
+</body>
+</html>

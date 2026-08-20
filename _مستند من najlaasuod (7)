@@ -1,0 +1,53 @@
+<div class="
+"></div><?php require_once 'config/database.php'; include 'includes/header.php';
+$products = $pdo->query('SELECT p.*, c.name category FROM products p JOIN categories c ON c.id=p.category_id ORDER BY p.id DESC LIMIT 4')->fetchAll();
+?>
+<section class="hero mb-5">
+  <div>
+    <img src="assets/images/logo.png" class="hero-logo mb-4" alt="Smart Tech Logo">
+    <h1>Smart <span>Tech</span></h1>
+    <p class="tagline mb-2">The Future of Electronics</p>
+    <p class="desc">متجر إلكتروني متخصص في عرض وبيع الأجهزة التقنية الحديثة مثل الجوالات، اللابتوبات، الساعات الذكية والسماعات، .</p>
+    <div class="hero-actions">
+      <a href="auth/login.php" class="btn btn-tech btn-lg px-5">تسجيل دخول</a>
+      <a href="auth/register.php" class="btn btn-cyan btn-lg px-5">إنشاء حساب جديد</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-card mb-5">
+  <div class="row align-items-center g-5">
+    <div class="col-lg-7 about-text">
+      <h2 class="section-title text-center text-lg-start mb-4">وصف المتجر</h2>
+      <p>يهدف مشروع <b>Smart Tech</b> إلى تقديم نموذج متجر إلكتروني منظم وسهل الاستخدام لبيع الأجهزة الإلكترونية، بحيث يستطيع الزائر استعراض المنتجات ومعرفة تفاصيلها وإضافتها إلى السلة بطريقة بسيطة.</p>
+      <p> <b> </b>، ويحتوي على لوحة تحكم للمسؤول لإدارة المنتجات والتصنيفات والمخزون والطلبات، مع نظام تسجيل دخول وصلاحيات للمستخدمين.</p>
+      <div class="row g-3 mt-2">
+        <div class="col-md-4"><div class="feature-box text-center"><b>تصميم واضح</b><br><small>ألوان بيضاء مع أزرق تقني</small></div></div>
+        <div class="col-md-4"><div class="feature-box text-center"><b>إدارة منتجات</b><br><small>إضافة، تعديل، حذف</small></div></div>
+        <div class="col-md-4"><div class="feature-box text-center"><b>قاعدة بيانات</b><br><small>جداول مترابطة ومنظمة</small></div></div>
+      </div>
+    </div>
+    <div class="col-lg-5 text-center">
+      <img src="assets/images/logo.png" class="about-logo" alt="Smart Tech Logo">
+    </div>
+  </div>
+</section>
+
+<h3 class="section-title text-center mb-5">أحدث المنتجات</h3>
+<div class="row g-4">
+<?php foreach($products as $p): ?>
+  <div class="col-md-6 col-lg-3">
+    <div class="card product-card">
+      <img src="<?= e($p['image']) ?>" class="product-img" alt="<?= e($p['name']) ?>">
+      <div class="card-body text-center">
+        <h5><?= e($p['name']) ?></h5>
+        <p class="category-text mb-1"><?= e($p['category']) ?></p>
+        <p class="product-desc small"><?= e($p['description']) ?></p>
+        <div class="price">$<?= e($p['price']) ?></div>
+        <a href="product.php?id=<?= $p['id'] ?>" class="btn btn-outline-tech mt-3 w-100">عرض التفاصيل</a>
+      </div>
+    </div>
+  </div>
+<?php endforeach; ?>
+</div>
+<?php include 'includes/footer.php'; ?>
